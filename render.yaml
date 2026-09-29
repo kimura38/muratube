@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: muratube-render
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: UPSTREAM_ORIGIN
+        sync: false
