@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>muratube</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #ffffff; color: #0f0f0f; display: flex; flex-direction: column; height: 100vh; font-size: 14px; transition: background-color 0.3s; }
+        header { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 56px; border-bottom: 1px solid #e5e5e5; position: fixed; width: 100%; top: 0; background: white; z-index: 100; box-sizing: border-box; transition: background-color 0.3s; }
+        .logo-area { display: flex; align-items: center; gap: 16px; width: 250px; }
+        .logo-area .material-icons.menu { cursor: pointer; color: #0f0f0f; font-size: 24px; transition: color 0.3s; }
+        .logo { display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 20px; letter-spacing: -1px; cursor: pointer; user-select: none; transition: color 0.3s; }
+        .logo-icon { background-color: #ff0000; color: white; border-radius: 6px; width: 30px; height: 22px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .logo-icon span { font-size: 14px; margin-left: 2px; }
+        
+        .search-area { display: flex; align-items: center; flex-grow: 1; max-width: 600px; margin: 0 16px; }
+        .search-area input { flex-grow: 1; padding: 0 16px; border: 1px solid #ccc; border-radius: 20px 0 0 20px; font-size: 16px; outline: none; height: 40px; }
+        .search-area button { padding: 0 20px; border: 1px solid #ccc; border-left: none; background: #f8f8f8; border-radius: 0 20px 20px 0; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; }
+        
+        .platform-toggle { display: flex; background: #f2f2f2; border-radius: 20px; padding: 3px; border: 1px solid #e5e5e5; transition: all 0.3s; }
+        .platform-toggle button { border: none; background: transparent; padding: 6px 14px; border-radius: 18px; cursor: pointer; font-weight: bold; color: #606060; font-size: 13px; outline: none; transition: all 0.2s; }
+        .platform-toggle button.active { background: white; color: #000; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .platform-toggle button#btn-yt.active { color: #ff0000; }
+        .platform-toggle button#btn-nico.active { color: #0088cc; }
+
+        body.niconico-theme header { background-color: #252525; border-bottom: none; }
+        body.niconico-theme header .logo { color: #ffffff; }
+        body.niconico-theme header .menu { color: #ffffff; }
+        body.niconico-theme .logo-icon { background-color: transparent; border: 1.5px solid #ffffff; }
+        body.niconico-theme .logo-icon span.material-icons { font-size: 16px; margin: 0; }
+        body.niconico-theme .platform-toggle { background: #333333; border-color: #444444; }
+        body.niconico-theme .platform-toggle button { color: #aaaaaa; }
+        body.niconico-theme .platform-toggle button.active { background: #555555; color: #ffffff; }
+        body.niconico-theme .sidebar { background-color: #f4f4f4; border-right: 1px solid #ddd; }
+        body.niconico-theme .bottom-nav { background-color: #252525; border-top: 1px solid #444; }
+        body.niconico-theme .bottom-nav-item { color: #fff; }
+        body.niconico-theme .bottom-nav-item.active { color: #0088cc; }
+
+        .container { display: flex; margin-top: 56px; height: calc(100vh - 56px); }
+        .sidebar { width: 72px; background: white; border-right: 1px solid #e5e5e5; display: flex; flex-direction: column; align-items: center; padding-top: 4px; overflow-y: auto; flex-shrink: 0; transition: all 0.3s; overflow: hidden; }
+        .sidebar.hidden { width: 0; border-right: none; }
+        .sidebar-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 16px 0; color: #0f0f0f; text-decoration: none; font-size: 10px; cursor: pointer; }
+        .sidebar-item:hover { background: #e5e5e5; border-radius: 8px; }
+        .sidebar-item.active { color: #065fd4; font-weight: bold; }
+
+        .bottom-nav { display: none; background: white; border-top: 1px solid #e5e5e5; position: fixed; bottom: 0; width: 100%; height: 56px; z-index: 100; justify-content: space-around; align-items: center; box-sizing: border-box; }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; color: #0f0f0f; font-size: 10px; flex-grow: 1; cursor: pointer; padding: 6px 0; }
+        .bottom-nav-item.active { color: #065fd4; font-weight: bold; }
+
+        .main-content { flex-grow: 1; overflow-y: auto; background-color: #f9f9f9; padding: 24px; display: flex; flex-direction: column; align-items: center; }
+        .content-area { width: 100%; max-width: 1300px; flex-grow: 1; box-sizing: border-box; }
+        .view { display: none; width: 100%; }
+        .view.active { display: block; }
+
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .video-card-grid { cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
+        .video-card-grid img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; }
+        .video-card-grid h3 { margin: 0; font-size: 16px; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .video-card-grid p { margin: 0; color: #606060; font-size: 13px; }
+
+        .player-layout { display: grid; grid-template-columns: 2.5fr 1fr; gap: 24px; }
+        .video-container { position: relative; width: 100%; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        video { width: 100%; height: 100%; outline: none; background: #000; }
+        video::cue { background-color: rgba(0, 0, 0, 0.7); color: white; font-size: 18px; text-shadow: 1px 1px 2px black; border-radius: 4px; padding: 4px; }
+        
+        .custom-overlay { position: absolute; top: 12px; right: 12px; background: rgba(30,30,30,0.85); color: white; padding: 12px; border-radius: 8px; font-size: 13px; display: flex; flex-direction: column; gap: 10px; z-index: 10; border: 1px solid #555; }
+        .overlay-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .overlay-btn { background: #555; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: 100%; transition: background 0.2s; }
+        .overlay-select { background: #000; color: white; border: 1px solid #555; padding: 4px; border-radius: 4px; font-size: 12px; cursor: pointer; outline: none; }
+        .live-badge { background: #065fd4; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; letter-spacing: 1px; display: inline-block; }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .spin-icon { animation: spin 1.5s linear infinite; font-size: 32px; margin-bottom: 8px; display: inline-block; }
+
+        .video-title { font-size: 20px; font-weight: bold; margin: 12px 0 8px 0; }
+        .channel-action-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top:12px; }
+        .channel-info-area { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 8px; border-radius: 8px; transition: background 0.2s; }
+        .channel-info-area:hover { background: #e5e5e5; }
+        .channel-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #ccc; background-position: center; background-size: cover; }
+        
+        .action-buttons { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .action-btn { background: #e5e5e5; border: none; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; color: #0f0f0f; display: flex; align-items: center; gap: 6px; }
+        .dl-select { padding: 6px 12px; border-radius: 20px; border: 1px solid #ccc; background: #fff; font-size: 13px; outline: none; }
+        
+        .video-description { background: #f2f2f2; padding: 16px; border-radius: 12px; font-size: 14px; margin-top: 12px; white-space: pre-wrap; word-wrap: break-word; overflow: hidden; max-height: 100px; position: relative; cursor: pointer; transition: max-height 0.3s; }
+        .video-description.expanded { max-height: none; }
+        
+        .comments-section { margin-top: 24px; }
+        .comment-item { display: flex; gap: 12px; margin-bottom: 16px; }
+        .comment-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #ccc; flex-shrink: 0; background-position: center; background-size: cover; }
+        
+        .related-list { display: flex; flex-direction: column; gap: 12px; }
+        .related-card { display: flex; gap: 10px; cursor: pointer; }
+        .related-card img { width: 168px; height: 94px; object-fit: cover; border-radius: 8px; }
+        .related-info h4 { margin: 0 0 4px 0; font-size: 14px; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .settings-card { background: white; padding: 24px; border-radius: 12px; border: 1px solid #e5e5e5; max-width: 600px; margin: 0 auto; }
+        .setting-group { margin-bottom: 20px; }
+        .setting-group select { padding: 10px; border-radius: 6px; border: 1px solid #ccc; width: 100%; font-size: 14px; outline: none; }
+
+        #dl-block-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 10000; flex-direction: column;
+            align-items: center; justify-content: center; color: white; text-align: center;
+        }
+        .progress-bar-container { width: 80%; max-width: 400px; height: 12px; background: #444; border-radius: 6px; overflow: hidden; margin-top: 20px; }
+        #dl-progress-bar { width: 0%; height: 100%; background: #065fd4; transition: width 0.3s linear; }
+        .cancel-btn { margin-top: 24px; padding: 10px 32px; background: #ff4d4d; color: white; border: none; border-radius: 24px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .cancel-btn:hover { background: #ff3333; }
+
+        @media (max-width: 900px) {
+            header { padding: 0 8px; }
+            .logo-area { width: auto; gap: 8px; }
+            .logo-area .menu { display: none; }
+            #main-logo-text { display: none; }
+            .search-area { display: flex; margin: 0 8px; max-width: none; }
+            .search-area input { height: 36px; font-size: 14px; padding: 0 12px; }
+            .search-area button { height: 38px; padding: 0 12px; }
+            .platform-toggle button { padding: 6px 10px; font-size: 11px; }
+            .sidebar { display: none !important; }
+            .bottom-nav { display: flex; }
+            .container { height: calc(100vh - 56px - 56px); margin-top: 56px; margin-bottom: 56px; }
+            .main-content { padding: 12px; }
+            .video-grid { grid-template-columns: 1fr; gap: 24px; }
+            .video-card-grid h3 { font-size: 15px; }
+            .player-layout { grid-template-columns: 1fr; display: flex; flex-direction: column; gap: 16px; }
+            .channel-action-row { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .action-buttons { width: 100%; justify-content: space-between; }
+            .related-card { flex-direction: row; align-items: center; }
+            .related-card img { width: 140px; height: 78px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="dl-block-overlay">
+        <span class="material-icons spin-icon" style="font-size:48px;">download</span>
+        <h2 style="margin:0;">ダウンロード準備中...</h2>
+        <p style="color:#bbb; font-size:14px; margin-top:8px;">端末に直接保存されます。このままお待ちください。</p>
+        <div class="progress-bar-container"><div id="dl-progress-bar"></div></div>
+        <p id="dl-progress-text" style="font-size:28px; font-weight:bold; margin-top:12px; margin-bottom: 4px;">0%</p>
+        <p id="dl-progress-size" style="font-size:15px; color:#aaa; margin:0; font-weight:bold;">容量を計算中...</p>
+        <button class="cancel-btn" onclick="cancelDownload()">キャンセル</button>
+    </div>
+
+    <header>
+        <div class="logo-area">
+            <span class="material-icons menu" onclick="toggleSidebar()">menu</span>
+            <div class="logo" onclick="switchView('home-view')">
+                <div class="logo-icon" id="main-logo-icon"><span>▶</span></div>
+                <span id="main-logo-text">muratube</span>
+                <span style="font-size:11px; color:#888; font-weight:normal; display:flex; align-items:center; margin-left:8px;" title="総アクセス数">
+                    <span class="material-icons" style="font-size:13px; margin-right:2px;">visibility</span>
+                    <span id="visit-count-val">-</span>
+                </span>
+            </div>
+        </div>
+        <div class="search-area">
+            <input type="text" id="searchInput" placeholder="検索" onkeypress="if(event.key === 'Enter') doSearch()">
+            <button onclick="doSearch()"><span class="material-icons">search</span></button>
+        </div>
+        <div class="platform-toggle">
+            <button id="btn-yt" onclick="setPlatform('youtube')">YouTube</button>
+            <button id="btn-nico" onclick="setPlatform('niconico')">ニコニコ</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-item" id="nav-home" onclick="switchView('home-view')"><span class="material-icons">home</span><span>ホーム</span></div>
+            <div class="sidebar-item" id="nav-history" onclick="switchView('history-view')"><span class="material-icons">history</span><span>履歴</span></div>
+            <div class="sidebar-item" id="nav-settings" onclick="switchView('settings-view')"><span class="material-icons">settings</span><span>設定</span></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-area">
+                <div id="home-view" class="view active">
+                    <h2 style="margin-top:0;">おすすめ</h2>
+                    <div id="home-results" class="video-grid">読み込み中...</div>
+                </div>
+                <div id="search-view" class="view">
+                    <h2 style="margin-top:0;">検索結果</h2>
+                    <div id="search-results" class="video-grid"></div>
+                </div>
+                <div id="history-view" class="view">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h2 style="margin:0;">再生履歴</h2>
+                        <button onclick="clearHistory()" style="padding:8px 16px; border:1px solid #ccc; background:white; border-radius:20px; cursor:pointer;">履歴を削除</button>
+                    </div>
+                    <div id="history-results" class="video-grid"></div>
+                </div>
+                <div id="channel-view" class="view">
+                    <div style="display:flex; align-items:center; gap:16px; margin-bottom: 24px;">
+                        <div class="channel-avatar" style="width:64px; height:64px;" id="ch-avatar-main"></div>
+                        <h2 id="channel-view-title" style="margin:0; font-size:24px;">チャンネル名</h2>
+                    </div>
+                    <div id="channel-results" class="video-grid"></div>
+                </div>
+                <div id="settings-view" class="view">
+                    <div class="settings-card">
+                        <h2 style="margin-top:0;">設定</h2>
+                        <div class="setting-group">
+                            <label style="font-weight:bold; margin-bottom:8px; display:block;" for="renderApiUrl">Render API URL</label>
+                            <input id="renderApiUrl" type="url" inputmode="url" placeholder="https://your-service.onrender.com" onchange="saveSettings()" style="box-sizing:border-box; padding:10px; border-radius:6px; border:1px solid #ccc; width:100%; font-size:14px; outline:none;">
+                            <p style="font-size:12px; color:#888;">このHTMLをRender以外（GASなど）で公開する場合だけ設定してください。RenderでこのHTMLを開く場合は自動設定されます。</p>
+                        </div>
+                        <div class="setting-group">
+                            <label style="font-weight:bold; margin-bottom:8px; display:block;">サムネイルの取得方法</label>
+                            <select id="thumbMethod" onchange="saveSettings()">
+                                <option value="direct">直接リンク (デフォルト)</option>
+                                <option value="server">Render経由 (Base64・安全)</option>
+                            </select>
+                            <p style="font-size:12px; color:#888;">※「Render経由」を選択すると、画像リクエストはRenderの中継になります。</p>
+                        </div>
+                        <div class="setting-group" id="yt-settings-group">
+                            <label style="font-weight:bold; margin-bottom:8px; display:block;">YouTubeの再生方法</label>
+                            <select id="ytPlayMethod" onchange="saveSettings()">
+                                <option value="stream">サーバー中継プロキシ (安定・IP隠蔽)</option>
+                                <option value="direct">直接リンク再生 (ブラウザ直読み)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div id="player-view" class="view">
+                    <div class="player-layout">
+                        <div class="video-section">
+                            <div class="video-container" id="video-container-inner" data-url="">
+                                <div style="color:white;"><span class="material-icons spin-icon">sync</span> 読み込み中...</div>
+                            </div>
+                            
+                            <h2 id="video-title" class="video-title">タイトル</h2>
+                            <div class="channel-action-row">
+                                <div class="channel-info-area" id="channel-click-area">
+                                    <div class="channel-avatar" id="channel-avatar-img"></div>
+                                    <div class="channel-text">
+                                        <h4 id="video-channel" style="margin:0;">チャンネル名</h4><p>チャンネルを見る</p>
+                                    </div>
+                                </div>
+                                <div class="action-buttons">
+                                    <select id="quick-play-method" class="dl-select" onchange="changeQuickPlayMethod(this.value)">
+                                        <option value="stream">中継プロキシ</option>
+                                        <option value="direct">直接リンク</option>
+                                    </select>
+                                    <select id="dl-quality-select" class="dl-select"></select>
+                                    <button class="action-btn" id="dl-action-btn" onclick="triggerDownload()">
+                                        <span class="material-icons" style="font-size:18px;">download</span> DL
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="video-description" id="video-desc" onclick="this.classList.toggle('expanded')">概要を取得中...</div>
+                            <div class="comments-section" id="comments-section">
+                                <h3 style="margin-top:0;">コメント</h3>
+                                <div id="comments-list">コメントを取得中...</div>
+                            </div>
+                        </div>
+                        <div class="related-videos">
+                            <h3 style="margin-top:0;">関連動画</h3>
+                            <div id="related-results" class="related-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="bottom-nav-item active" id="bot-nav-home" onclick="switchView('home-view')"><span class="material-icons">home</span><span>ホーム</span></div>
+        <div class="bottom-nav-item" id="bot-nav-history" onclick="switchView('history-view')"><span class="material-icons">history</span><span>履歴</span></div>
+        <div class="bottom-nav-item" id="bot-nav-settings" onclick="switchView('settings-view')"><span class="material-icons">settings</span><span>設定</span></div>
+    </nav>
+
+    <script>
+        // ==========================================
+        // Renderで配信しているときは同じオリジンを使う。
+        // GASなど別の場所でHTMLを公開するときは、設定画面でRender URLを保存する。
+        const DEFAULT_RENDER_API_URL = location.hostname.endsWith('.onrender.com')
+            ? location.origin
+            : '';
+
+        function apiBase() {
+            return (localStorage.getItem('renderApiUrl') || DEFAULT_RENDER_API_URL).replace(/\/$/, '');
+        }
+
+        function apiUrl(path) {
+            const base = apiBase();
+            if (!base) throw new Error('Render API URL is not configured');
+            return `${base}${path}`;
+        }
+
+        function showApiConfigurationError() {
+            return '<div style="padding:16px; color:#b00020;">Render API URLが未設定です。設定画面で入力してください。</div>';
+        }
+        // ==========================================
+
+        let currentPlatform = localStorage.getItem('platform') || 'youtube';
+        document.getElementById('thumbMethod').value = localStorage.getItem('thumbMethod') || 'direct';
+        if (!localStorage.getItem('ytPlayMethod')) localStorage.setItem('ytPlayMethod', 'stream');
+        document.getElementById('ytPlayMethod').value = localStorage.getItem('ytPlayMethod');
+        document.getElementById('quick-play-method').value = localStorage.getItem('ytPlayMethod');
+
+        let currentVideos = [];
+        let playHistory = JSON.parse(localStorage.getItem('playHistory') || '[]');
+        let audioSyncInterval = null; 
+        let currentExtractedData = null;
+        
+        // ダウンロード関連
+        let currentJobId = null;
+        let currentJobInterval = null;
+
+        window.addEventListener('beforeunload', () => {
+            if (currentJobId && apiBase()) fetch(apiUrl(`/api/job-cancel?id=${currentJobId}`), { method: 'POST' });
+        });
+
+        window.onload = async () => {
+            document.getElementById('renderApiUrl').value = apiBase();
+            updatePlatformUI();
+            if (apiBase()) fetch(apiUrl('/api/visit')).then(r => r.json()).then(data => {
+                if(data.count) document.getElementById('visit-count-val').innerText = data.count.toLocaleString();
+            }).catch(e => console.error(e));
+            
+            loadRecommend();
+        };
+
+        function saveSettings() {
+            const field = document.getElementById('renderApiUrl');
+            const value = field.value.trim().replace(/\/$/, '');
+            if (value) {
+                try { new URL(value); }
+                catch (_) { alert('Render API URLを https://... の形式で入力してください。'); return; }
+                localStorage.setItem('renderApiUrl', value);
+            } else if (!DEFAULT_RENDER_API_URL) {
+                localStorage.removeItem('renderApiUrl');
+            }
+            localStorage.setItem('thumbMethod', document.getElementById('thumbMethod').value); 
+            localStorage.setItem('ytPlayMethod', document.getElementById('ytPlayMethod').value);
+            document.getElementById('quick-play-method').value = document.getElementById('ytPlayMethod').value;
+            loadRecommend();
+        }
+
+        function changeQuickPlayMethod(val) {
+            localStorage.setItem('ytPlayMethod', val);
+            document.getElementById('ytPlayMethod').value = val;
+            const resVal = document.getElementById('player-quality-select') ? document.getElementById('player-quality-select').value : '';
+            changePlayerQuality(resVal);
+        }
+
+        function setPlatform(platform) {
+            currentPlatform = platform;
+            localStorage.setItem('platform', platform);
+            updatePlatformUI();
+            switchView('home-view');
+            loadRecommend();
+        }
+
+        function updatePlatformUI() {
+            const body = document.body;
+            document.getElementById('btn-yt').classList.toggle('active', currentPlatform === 'youtube');
+            document.getElementById('btn-nico').classList.toggle('active', currentPlatform === 'niconico');
+
+            if (currentPlatform === 'niconico') {
+                body.classList.add('niconico-theme');
+                document.getElementById('main-logo-icon').innerHTML = '<span class="material-icons" style="font-size:16px;">tv</span>';
+                document.getElementById('main-logo-text').innerText = 'muraにこ動画';
+                document.getElementById('dl-quality-select').style.display = 'none';
+                document.getElementById('quick-play-method').style.display = 'none';
+                document.getElementById('yt-settings-group').style.display = 'none';
+            } else {
+                body.classList.remove('niconico-theme');
+                document.getElementById('main-logo-icon').innerHTML = '<span>▶</span>';
+                document.getElementById('main-logo-text').innerText = 'muratube';
+                document.getElementById('dl-quality-select').style.display = 'inline-block';
+                document.getElementById('quick-play-method').style.display = 'inline-block';
+                document.getElementById('yt-settings-group').style.display = 'block';
+            }
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); }
+        
+        function clearHistory() {
+            playHistory = [];
+            localStorage.setItem('playHistory', '[]');
+            renderVideos([], 'history-results');
+        }
+
+        function destroyPlayer() {
+            if(audioSyncInterval) clearInterval(audioSyncInterval);
+            const p = document.getElementById('video-player');
+            const a = document.getElementById('audio-player');
+            if (p) { p.pause(); p.removeAttribute('src'); p.load(); }
+            if (a) { a.pause(); a.removeAttribute('src'); a.load(); }
+            document.getElementById('video-container-inner').innerHTML = '';
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            
+            document.querySelectorAll('.sidebar-item, .bottom-nav-item').forEach(v => v.classList.remove('active'));
+            
+            if(viewId === 'home-view') {
+                document.getElementById('nav-home').classList.add('active');
+                document.getElementById('bot-nav-home').classList.add('active');
+            }
+            if(viewId === 'history-view') {
+                document.getElementById('nav-history').classList.add('active');
+                document.getElementById('bot-nav-history').classList.add('active');
+                renderVideos(playHistory, 'history-results');
+            }
+            if(viewId === 'settings-view') {
+                document.getElementById('nav-settings').classList.add('active');
+                document.getElementById('bot-nav-settings').classList.add('active');
+            }
+            if(viewId !== 'player-view') destroyPlayer();
+        }
+
+        // --- サムネイル取得 ---
+        async function fetchBase64Thumb(url, imgElement) {
+            if(!url) return;
+            if(localStorage.getItem('thumbMethod') === 'server') {
+                try {
+                    const res = await fetch(apiUrl(`/api/thumb-base64?url=${encodeURIComponent(url)}`));
+                    const data = await res.json();
+                    if(data.base64) {
+                        if(imgElement.tagName === 'IMG') imgElement.src = data.base64;
+                        else imgElement.style.backgroundImage = `url('${data.base64}')`;
+                        return;
+                    }
+                } catch(e) {}
+            }
+            if(imgElement.tagName === 'IMG') imgElement.src = url;
+            else imgElement.style.backgroundImage = `url('${url}')`;
+        }
+
+        function processThumbnails() {
+            document.querySelectorAll('.lazy-thumb').forEach(el => {
+                const url = el.getAttribute('data-src');
+                if(url) {
+                    fetchBase64Thumb(url, el);
+                    el.classList.remove('lazy-thumb');
+                }
+            });
+        }
+
+        async function loadRecommend() {
+            document.getElementById('home-results').innerHTML = '<span class="material-icons spin-icon">sync</span> 読み込み中...';
+            try {
+                const res = await fetch(apiUrl(`/api/recommend?platform=${currentPlatform}`));
+                currentVideos = await res.json();
+                renderVideos(currentVideos, 'home-results');
+            } catch (_) { document.getElementById('home-results').innerHTML = showApiConfigurationError(); }
+        }
+
+        async function doSearch() {
+            const query = document.getElementById('searchInput').value;
+            if(!query) return;
+            switchView('search-view');
+            document.getElementById('search-results').innerHTML = '<span class="material-icons spin-icon">sync</span> 検索中...';
+            try {
+                const res = await fetch(apiUrl(`/api/search?q=${encodeURIComponent(query)}&platform=${currentPlatform}`));
+                const data = await res.json();
+                currentVideos = data;
+                renderVideos(currentVideos, 'search-results');
+            } catch (_) { document.getElementById('search-results').innerHTML = showApiConfigurationError(); }
+        }
+
+        async function loadChannel(url, name) {
+            if(!url) return;
+            switchView('channel-view');
+            document.getElementById('channel-view-title').innerText = name;
+            document.getElementById('channel-results').innerHTML = '読み込み中...';
+            try {
+                const res = await fetch(apiUrl(`/api/channel?url=${encodeURIComponent(url)}`));
+                renderVideos(await res.json(), 'channel-results');
+            } catch (_) { document.getElementById('channel-results').innerHTML = showApiConfigurationError(); }
+        }
+
+        function renderVideos(videos, containerId) {
+            const container = document.getElementById(containerId);
+            if(videos.error) { container.innerHTML = `<div style="color:red;">エラー: ${videos.error}</div>`; return; }
+            container.innerHTML = videos.length ? '' : '動画がありません';
+            videos.forEach((video) => {
+                const isRelated = containerId === 'related-results';
+                const safeVideo = JSON.stringify(video).replace(/"/g, '&quot;');
+                container.innerHTML += `
+                    <div class="${isRelated ? 'related-card' : 'video-card-grid'}" onclick="playVideo(${safeVideo})">
+                        <img src="" data-src="${video.thumbnail}" class="lazy-thumb" alt="thumbnail">
+                        <div class="${isRelated ? 'related-info' : ''}">
+                            <h3>${video.title}</h3>
+                            <p>${video.channel}<br>${video.duration} ${video.views ? '• ' + video.views.toLocaleString() + '回視聴' : ''}</p>
+                        </div>
+                    </div>`;
+            });
+            processThumbnails();
+        }
+
+        function applyAudioSync(vid, aud) {
+            if (vid && aud && aud.src) {
+                vid.play().catch(()=>{});
+                aud.play().catch(()=>{});
+                vid.addEventListener('play', () => { aud.play().catch(()=>{}); });
+                vid.addEventListener('pause', () => aud.pause());
+                vid.addEventListener('playing', () => { aud.play().catch(()=>{}); });
+                vid.addEventListener('waiting', () => aud.pause());
+                vid.addEventListener('seeking', () => { aud.currentTime = vid.currentTime; });
+                vid.addEventListener('seeked', () => { aud.currentTime = vid.currentTime; });
+                vid.addEventListener('ratechange', () => { aud.playbackRate = vid.playbackRate; });
+                
+                if(audioSyncInterval) clearInterval(audioSyncInterval);
+                audioSyncInterval = setInterval(() => {
+                    if (!vid.paused && !aud.paused && Math.abs(vid.currentTime - aud.currentTime) > 0.5) {
+                        aud.currentTime = vid.currentTime;
+                    }
+                }, 2000);
+            }
+        }
+
+        function getDirectUrls(targetRes) {
+            if (!currentExtractedData) return { v: null, a: null, v_id: null, a_id: null };
+            let vids = [...currentExtractedData.vids];
+            let audios = [...currentExtractedData.audios];
+            if (targetRes) vids = vids.filter(f => f.height <= parseInt(targetRes));
+            
+            let combinedVids = vids.filter(f => f.acodec && f.acodec !== 'none' && f.vcodec && f.vcodec !== 'none' && f.ext === 'mp4');
+            if (combinedVids.length > 0) {
+                combinedVids.sort((a, b) => (a.height || 0) - (b.height || 0));
+                const best = combinedVids[combinedVids.length - 1];
+                return { v: best.url, a: null, v_id: best.format_id, a_id: null };
+            }
+            
+            let safeVids = vids.filter(f => !f.protocol?.includes('m3u8') && f.ext === 'mp4');
+            if (safeVids.length > 0) vids = safeVids;
+            vids.sort((a, b) => (a.height || 0) - (b.height || 0));
+            
+            const bestVideo = vids[vids.length - 1];
+            let audioUrl = null, audioId = null;
+            
+            if (bestVideo && (!bestVideo.acodec || bestVideo.acodec === 'none')) {
+                let safeAudios = audios.filter(f => !f.protocol?.includes('m3u8') && f.ext === 'm4a');
+                if (safeAudios.length === 0) safeAudios = audios.filter(f => !f.protocol?.includes('m3u8'));
+                if (safeAudios.length > 0) audios = safeAudios;
+                if (audios.length > 0) {
+                    audios.sort((a, b) => (a.abr || 0) - (b.abr || 0));
+                    audioUrl = audios[audios.length - 1].url;
+                    audioId = audios[audios.length - 1].format_id;
+                }
+            }
+            return { v: bestVideo ? bestVideo.url : null, a: audioUrl, v_id: bestVideo ? bestVideo.format_id : null, a_id: audioId };
+        }
+
+        function changePlayerQuality(resValue) {
+            if(audioSyncInterval) clearInterval(audioSyncInterval);
+            const container = document.getElementById('video-container-inner');
+            const data = currentExtractedData;
+            if(!data) return;
+
+            const useProxy = (localStorage.getItem('ytPlayMethod') === 'stream');
+            const { v, a } = getDirectUrls(resValue);
+
+            if(!v) {
+                container.innerHTML = '<div style="color:red; padding:20px;">リンクの取得に失敗しました。</div>';
+                return;
+            }
+
+            // 字幕トラック
+            const subUrl = data.subUrl;
+            const vTrack = subUrl ? apiUrl(`/api/proxy?url=${encodeURIComponent(subUrl)}`) : '';
+            const trackHtml = vTrack ? `<track src="${vTrack}" kind="subtitles" srclang="ja" label="字幕" default>` : '';
+            
+            let playerHTML = '';
+            if (useProxy) {
+                const pV = apiUrl(`/api/proxy?url=${encodeURIComponent(v)}`);
+                const pA = a ? apiUrl(`/api/proxy?url=${encodeURIComponent(a)}`) : null;
+                playerHTML = `<video id="video-player" src="${pV}" playsinline preload="metadata" style="width:100%; height:100%; outline:none; background:#000;" controls autoplay>${trackHtml}</video>`;
+                if (pA) playerHTML += `<audio id="audio-player" src="${pA}" preload="metadata" style="display:none;"></audio>`;
+            } else {
+                playerHTML = `<video id="video-player" src="${v}" playsinline preload="metadata" style="width:100%; height:100%; outline:none; background:#000;" controls autoplay>${trackHtml}</video>`;
+                if (a) playerHTML += `<audio id="audio-player" src="${a}" preload="metadata" style="display:none;"></audio>`;
+            }
+            
+            const liveBadgeHTML = useProxy ? '<div class="overlay-row"><span class="live-badge">中継プロキシ経由</span></div>' : '';
+            
+            const overlayHTML = `
+                <div class="custom-overlay">
+                    ${liveBadgeHTML}
+                    <div class="overlay-row">
+                        <label>画質:</label>
+                        <select id="player-quality-select" class="overlay-select" onchange="changePlayerQuality(this.value)"></select>
+                    </div>
+                    <button class="overlay-btn" onclick="document.getElementById('video-player').requestFullscreen()">全画面表示</button>
+                </div>
+            `;
+            container.innerHTML = playerHTML + overlayHTML;
+            
+            let opts = '<option value="">最高画質</option>';
+            (data.resolutions||[]).forEach(r => { opts += `<option value="${r}">${r}p</option>`; });
+            const pSel = document.getElementById('player-quality-select');
+            if(pSel) { pSel.innerHTML = opts; pSel.value = resValue || ''; }
+            
+            const dSel = document.getElementById('dl-quality-select');
+            if(dSel) dSel.innerHTML = opts;
+            
+            if(a) applyAudioSync(document.getElementById('video-player'), document.getElementById('audio-player'));
+        }
+
+        async function playVideo(video) {
+            switchView('player-view');
+            if(audioSyncInterval) clearInterval(audioSyncInterval);
+            
+            playHistory = playHistory.filter(v => v.id !== video.id);
+            playHistory.unshift(video);
+            if (playHistory.length > 50) playHistory.pop();
+            localStorage.setItem('playHistory', JSON.stringify(playHistory));
+
+            const container = document.getElementById('video-container-inner');
+            container.setAttribute('data-url', video.url);
+            
+            document.getElementById('video-title').innerText = video.title;
+            document.getElementById('video-channel').innerText = video.channel;
+            document.getElementById('video-desc').innerText = '概要を取得中...';
+            document.getElementById('comments-list').innerHTML = 'コメントを取得中...';
+            if (video.channel_url) document.getElementById('channel-click-area').onclick = () => loadChannel(video.channel_url, video.channel);
+
+            if (currentPlatform === 'niconico') {
+                // ニコニコ動画はNodeサーバーから直接動画ファイルをロード（50MB・Base64回避の最強手段）
+                container.innerHTML = `
+                    <div id="nico-loading-area" style="position:absolute; z-index:5; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; width:100%; height:100%; background:#000;">
+                        <span class="material-icons spin-icon">sync</span>
+                        <div style="margin-bottom:8px; font-size:13px; text-align:center;">
+                            ニコニコ動画をサーバー経由で読み込み中...
+                        </div>
+                    </div>
+                    <video id="video-player" playsinline style="width:100%; height:100%; outline:none; background:#000; position:relative; display:none;" controls autoplay></video>
+                `;
+                
+                try {
+                    // ジョブを発行して動画ファイルとして直接受け取る
+                    const res = await fetch(apiUrl(`/api/job-start?url=${encodeURIComponent(video.url)}&type=nico`));
+                    const data = await res.json();
+                    
+                    const checkInterval = setInterval(async () => {
+                        const progRes = await fetch(apiUrl(`/api/job-progress?id=${data.jobId}`));
+                        const progData = await progRes.json();
+                        
+                        if (progData.status === 'completed') {
+                            clearInterval(checkInterval);
+                            document.getElementById('nico-loading-area').style.display = 'none';
+                            const p = document.getElementById('video-player');
+                            p.style.display = 'block';
+                            p.src = apiUrl(`/api/job-file?id=${data.jobId}&type=nico`);
+                            p.play();
+                        } else if (progData.status === 'error') {
+                            clearInterval(checkInterval);
+                            container.innerHTML = `<div style="color:#ff6b6b; padding:20px; text-align:center;">読み込みに失敗しました</div>`;
+                        }
+                    }, 1000);
+                } catch(e) {
+                    container.innerHTML = `<div style="color:#ff6b6b; padding:20px; text-align:center;">動画の取得に失敗しました</div>`;
+                }
+                
+                document.getElementById('comments-list').innerHTML = 'ニコニコ動画のコメント表示には対応していません。';
+                
+            } else {
+                container.innerHTML = '<div style="color:white; display:flex; flex-direction:column; align-items:center;"><span class="material-icons spin-icon">sync</span> Render経由で通信中...</div>';
+                try {
+                    const res = await fetch(apiUrl(`/api/extract?id=${video.id}`));
+                    const data = await res.json();
+                    if (data.error) throw new Error(data.error);
+                    
+                    currentExtractedData = data;
+                    const details = data.details;
+                    
+                    document.getElementById('video-desc').innerText = details.description || '説明はありません';
+                    if(details.avatar) fetchBase64Thumb(details.avatar, document.getElementById('channel-avatar-img'));
+                    
+                    changePlayerQuality('');
+                    
+                    fetch(apiUrl(`/api/comments?url=${encodeURIComponent(video.url)}`))
+                        .then(r => r.json())
+                        .then(comments => {
+                            document.getElementById('comments-list').innerHTML = (comments?.length) ? 
+                                comments.map(c => `
+                                    <div class="comment-item">
+                                        <div class="comment-avatar lazy-thumb" data-src="${c.author_thumbnail}"></div>
+                                        <div><h5 style="margin:0 0 4px 0">${c.author} <span style="color:#888; font-weight:normal; margin-left:8px;">${c.time}</span></h5>
+                                        <p style="margin:0; font-size:14px; white-space:pre-wrap;">${c.text}</p></div>
+                                    </div>`).join('') : 'コメントはありません。';
+                            processThumbnails();
+                        })
+                        .catch(() => document.getElementById('comments-list').innerHTML = 'コメントを取得できませんでした。');
+
+                } catch (e) {
+                    container.innerHTML = '<div style="color:#ff6b6b; padding: 20px;">動画情報の取得に失敗しました。</div>';
+                }
+            }
+            window.scrollTo(0,0);
+            
+            const related = currentVideos.filter(v => v.id !== video.id).slice(0, 15);
+            renderVideos(related, 'related-results');
+        }
+
+        // --- ダウンロード機能 (直接端末保存) ---
+        function cleanupPreviousJob() {
+            if (currentJobId) {
+                fetch(apiUrl(`/api/job-cancel?id=${currentJobId}`), { method: 'POST' });
+                currentJobId = null;
+            }
+            if (currentJobInterval) {
+                clearInterval(currentJobInterval);
+                currentJobInterval = null;
+            }
+        }
+
+        function cancelDownload() {
+            cleanupPreviousJob();
+            document.getElementById('dl-block-overlay').style.display = 'none';
+            document.getElementById('dl-action-btn').innerHTML = '<span class="material-icons" style="font-size:18px;">download</span> DL';
+            document.getElementById('dl-progress-size').innerText = 'キャンセルされました';
+        }
+
+        async function triggerDownload() {
+            const url = document.getElementById('video-container-inner').getAttribute('data-url');
+            if (!url) return;
+            
+            const overlay = document.getElementById('dl-block-overlay');
+            const pBar = document.getElementById('dl-progress-bar');
+            const pTxt = document.getElementById('dl-progress-text');
+            const pSizeTxt = document.getElementById('dl-progress-size');
+            const btn = document.getElementById('dl-action-btn');
+            
+            overlay.style.display = 'flex';
+            pBar.style.width = '0%';
+            pTxt.innerText = '0%';
+            pSizeTxt.innerText = '容量を計算中...';
+            btn.innerHTML = '<span class="material-icons spin-icon" style="font-size:18px;">sync</span> 準備中';
+            
+            cleanupPreviousJob();
+            
+            let reqUrl = apiUrl(`/api/job-start?url=${encodeURIComponent(url)}`);
+            if (currentPlatform === 'youtube') {
+                const targetRes = document.getElementById('dl-quality-select').value || '';
+                const { v_id, a_id } = getDirectUrls(targetRes); // 修正済み
+                reqUrl += `&type=dl&v_id=${v_id || ''}&a_id=${a_id || ''}`;
+            } else {
+                reqUrl += `&type=nico`;
+            }
+            
+            try {
+                // ダウンロードは確実に動かすため Node サーバーへ直接リクエスト
+                const res = await fetch(reqUrl);
+                const data = await res.json();
+                if (!data.jobId) throw new Error();
+                
+                currentJobId = data.jobId;
+                currentJobInterval = setInterval(async () => {
+                    if (!currentJobId) return clearInterval(currentJobInterval);
+                    const progRes = await fetch(apiUrl(`/api/job-progress?id=${currentJobId}`));
+                    const progData = await progRes.json();
+                    
+                    if (progData.status === 'processing') {
+                        const prog = progData.progress;
+                        pBar.style.width = `${prog}%`;
+                        pTxt.innerText = `${Math.floor(prog)}%`;
+                        
+                        if (progData.totalSize) {
+                            const totalValStr = progData.totalSize;
+                            const match = totalValStr.match(/([\d\.]+)([a-zA-Z]+)/);
+                            if (match) {
+                                const totalVal = parseFloat(match[1]);
+                                const dlVal = (totalVal * (prog / 100)).toFixed(2);
+                                pSizeTxt.innerText = `${dlVal}${match[2]} / ${totalVal}${match[2]}`;
+                            } else {
+                                pSizeTxt.innerText = totalValStr;
+                            }
+                        }
+                    } else if (progData.status === 'completed') {
+                        clearInterval(currentJobInterval);
+                        const idToComplete = currentJobId;
+                        currentJobId = null;
+                        
+                        pBar.style.width = `100%`;
+                        pTxt.innerText = '100%';
+                        pSizeTxt.innerText = '保存を開始します...';
+                        
+                        setTimeout(() => {
+                            overlay.style.display = 'none';
+                            btn.innerHTML = '<span class="material-icons" style="font-size:18px;">download</span> DL';
+                            // Node サーバーから直接端末へダウンロードさせる
+                            window.location.href = apiUrl(`/api/job-file?id=${idToComplete}&type=${currentPlatform === 'youtube' ? 'dl' : 'nico'}`);
+                        }, 1000);
+                    } else {
+                        throw new Error();
+                    }
+                }, 1000);
+            } catch(e) {
+                alert('ダウンロードに失敗しました。');
+                cancelDownload();
+            }
+        }
+    </script>
+</body>
+</html>
