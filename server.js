@@ -34,6 +34,8 @@ app.use('/', (req, res) => {
         targetUrl = `${NODE_SERVER}/api/comments?url=${encodeURIComponent(req.query.url || '')}`;
     } else if (action === 'thumb-base64') {
         targetUrl = `${NODE_SERVER}/api/thumb-base64?url=${encodeURIComponent(req.query.url || '')}`;
+    } else if (action === 'nico-comments') {
+        targetUrl = `${NODE_SERVER}/api/nico-comments?id=${encodeURIComponent(req.query.id || '')}`;
     } else if (action === 'reviews') {
         targetUrl = `${NODE_SERVER}/api/reviews?deviceId=${encodeURIComponent(req.query.deviceId || '')}`;
     } else if (action === 'review-save') {
