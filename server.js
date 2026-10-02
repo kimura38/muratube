@@ -54,7 +54,7 @@ app.use('/', (req, res) => {
     } else if (action === 'job-file') {
         targetUrl = `${NODE_SERVER}/api/job-file?id=${encodeURIComponent(req.query.id || '')}&type=${encodeURIComponent(req.query.type || '')}`;
     } else if (action === 'proxy') {
-        targetUrl = `${NODE_SERVER}/api/proxy?url=${encodeURIComponent(req.query.url || '')}`;
+        targetUrl = `${NODE_SERVER}/api/proxy?url=${encodeURIComponent(req.query.url || '')}&platform=${encodeURIComponent(req.query.platform || '')}`;
     }
 
     if (!targetUrl) return res.status(400).json({ error: 'Invalid action' });
