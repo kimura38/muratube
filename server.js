@@ -20,12 +20,12 @@ app.use('/', (req, res) => {
     if (action === 'search') {
         targetUrl = `${NODE_SERVER}/api/search?q=${encodeURIComponent(req.query.q || '')}&platform=${req.query.platform || 'youtube'}`;
     } else if (action === 'recommend') {
-        targetUrl = `${NODE_SERVER}/api/recommend?platform=${req.query.platform || 'youtube'}`;
+        targetUrl = `${NODE_SERVER}/api/recommend?platform=${encodeURIComponent(req.query.platform || 'youtube')}&seed=${encodeURIComponent(req.query.seed || '')}`;
     } else if (action === 'extract') {
         const queryStr = req.query.id
             ? `id=${encodeURIComponent(req.query.id)}`
             : `url=${encodeURIComponent(req.query.url || '')}`;
-        targetUrl = `${NODE_SERVER}/api/extract?${queryStr}&ip=${encodeURIComponent(req.query.ip || '')}`;
+        targetUrl = `${NODE_SERVER}/api/extract?${queryStr}&ip=${encodeURIComponent(req.query.ip || '')}&platform=${encodeURIComponent(req.query.platform || 'youtube')}`;
     } else if (action === 'visit') {
         targetUrl = `${NODE_SERVER}/api/visit`;
     } else if (action === 'channel') {
@@ -54,7 +54,7 @@ app.use('/', (req, res) => {
     } else if (action === 'job-file') {
         targetUrl = `${NODE_SERVER}/api/job-file?id=${encodeURIComponent(req.query.id || '')}&type=${encodeURIComponent(req.query.type || '')}`;
     } else if (action === 'proxy') {
-        targetUrl = `${NODE_SERVER}/api/proxy?url=${encodeURIComponent(req.query.url || '')}&platform=${encodeURIComponent(req.query.platform || '')}`;
+        targetUrl = `${NODE_SERVER}/api/proxy?url=${encodeURIComponent(req.query.url || '')}&platform=${encodeURIComponent(req.query.platform || '')}&relayBase=${encodeURIComponent(req.query.relayBase || '')}`;
     }
 
     if (!targetUrl) return res.status(400).json({ error: 'Invalid action' });
