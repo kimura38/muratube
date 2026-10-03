@@ -45,6 +45,7 @@ app.use('/', (req, res) => {
         if (req.query.height) query += `&height=${encodeURIComponent(req.query.height)}`;
         if (req.query.v_id) query += `&v_id=${encodeURIComponent(req.query.v_id)}`;
         if (req.query.a_id) query += `&a_id=${encodeURIComponent(req.query.a_id)}`;
+        if (req.query.withComments) query += `&withComments=${encodeURIComponent(req.query.withComments)}`;
         targetUrl = `${NODE_SERVER}/api/job-start?${query}`;
     } else if (action === 'job-progress') {
         targetUrl = `${NODE_SERVER}/api/job-progress?id=${encodeURIComponent(req.query.id || '')}`;
