@@ -31,7 +31,7 @@ app.use('/', (req, res) => {
     } else if (action === 'channel') {
         targetUrl = `${NODE_SERVER}/api/channel?url=${encodeURIComponent(req.query.url || '')}`;
     } else if (action === 'comments') {
-        targetUrl = `${NODE_SERVER}/api/comments?url=${encodeURIComponent(req.query.url || '')}&offset=${encodeURIComponent(req.query.offset || '0')}&limit=${encodeURIComponent(req.query.limit || '10')}`;
+        targetUrl = `${NODE_SERVER}/api/comments?url=${encodeURIComponent(req.query.url || '')}&offset=${encodeURIComponent(req.query.offset || '0')}&limit=${encodeURIComponent(req.query.limit || '10')}&pageToken=${encodeURIComponent(req.query.pageToken || '')}`;
     } else if (action === 'thumb-base64') {
         targetUrl = `${NODE_SERVER}/api/thumb-base64?url=${encodeURIComponent(req.query.url || '')}`;
     } else if (action === 'nico-comments') {
