@@ -31,7 +31,7 @@ app.use('/', (req, res) => {
     } else if (action === 'channel') {
         targetUrl = `${NODE_SERVER}/api/channel?url=${encodeURIComponent(req.query.url || '')}`;
     } else if (action === 'comments') {
-        targetUrl = `${NODE_SERVER}/api/comments?url=${encodeURIComponent(req.query.url || '')}`;
+        targetUrl = `${NODE_SERVER}/api/comments?url=${encodeURIComponent(req.query.url || '')}&offset=${encodeURIComponent(req.query.offset || '0')}&limit=${encodeURIComponent(req.query.limit || '10')}`;
     } else if (action === 'thumb-base64') {
         targetUrl = `${NODE_SERVER}/api/thumb-base64?url=${encodeURIComponent(req.query.url || '')}`;
     } else if (action === 'nico-comments') {
@@ -52,7 +52,7 @@ app.use('/', (req, res) => {
         targetUrl = `${NODE_SERVER}/api/job-cancel?id=${encodeURIComponent(req.query.id || '')}`;
         method = 'POST';
     } else if (action === 'job-file') {
-        targetUrl = `${NODE_SERVER}/api/job-file?id=${encodeURIComponent(req.query.id || '')}&type=${encodeURIComponent(req.query.type || '')}`;
+        targetUrl = `${NODE_SERVER}/api/job-file?id=${encodeURIComponent(req.query.id || '')}&type=${encodeURIComponent(req.query.type || '')}&download=${encodeURIComponent(req.query.download || '')}`;
     } else if (action === 'proxy') {
         targetUrl = `${NODE_SERVER}/api/proxy?url=${encodeURIComponent(req.query.url || '')}&platform=${encodeURIComponent(req.query.platform || '')}&relayBase=${encodeURIComponent(req.query.relayBase || '')}`;
     }
