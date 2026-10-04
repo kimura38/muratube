@@ -18,7 +18,7 @@ app.use('/', (req, res) => {
     let method = 'GET';
 
     if (action === 'search') {
-        targetUrl = `${NODE_SERVER}/api/search?q=${encodeURIComponent(req.query.q || '')}&platform=${req.query.platform || 'youtube'}`;
+        targetUrl = `${NODE_SERVER}/api/search?q=${encodeURIComponent(req.query.q || '')}&platform=${req.query.platform || 'youtube'}&page=${encodeURIComponent(req.query.page || '0')}`;
     } else if (action === 'health') {
         targetUrl = `${NODE_SERVER}/api/health`;
     } else if (action === 'recommend') {
@@ -32,6 +32,8 @@ app.use('/', (req, res) => {
         targetUrl = `${NODE_SERVER}/api/visit`;
     } else if (action === 'channel') {
         targetUrl = `${NODE_SERVER}/api/channel?url=${encodeURIComponent(req.query.url || '')}`;
+    } else if (action === 'channel-info') {
+        targetUrl = `${NODE_SERVER}/api/channel-info?url=${encodeURIComponent(req.query.url || '')}`;
     } else if (action === 'comments') {
         targetUrl = `${NODE_SERVER}/api/comments?url=${encodeURIComponent(req.query.url || '')}&offset=${encodeURIComponent(req.query.offset || '0')}&limit=${encodeURIComponent(req.query.limit || '10')}&pageToken=${encodeURIComponent(req.query.pageToken || '')}`;
     } else if (action === 'comment-replies') {
