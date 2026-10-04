@@ -19,6 +19,8 @@ app.use('/', (req, res) => {
 
     if (action === 'search') {
         targetUrl = `${NODE_SERVER}/api/search?q=${encodeURIComponent(req.query.q || '')}&platform=${req.query.platform || 'youtube'}`;
+    } else if (action === 'health') {
+        targetUrl = `${NODE_SERVER}/api/health`;
     } else if (action === 'recommend') {
         targetUrl = `${NODE_SERVER}/api/recommend?platform=${encodeURIComponent(req.query.platform || 'youtube')}&seed=${encodeURIComponent(req.query.seed || '')}`;
     } else if (action === 'extract') {
@@ -32,6 +34,10 @@ app.use('/', (req, res) => {
         targetUrl = `${NODE_SERVER}/api/channel?url=${encodeURIComponent(req.query.url || '')}`;
     } else if (action === 'comments') {
         targetUrl = `${NODE_SERVER}/api/comments?url=${encodeURIComponent(req.query.url || '')}&offset=${encodeURIComponent(req.query.offset || '0')}&limit=${encodeURIComponent(req.query.limit || '10')}&pageToken=${encodeURIComponent(req.query.pageToken || '')}`;
+    } else if (action === 'comment-replies') {
+        targetUrl = `${NODE_SERVER}/api/comment-replies?url=${encodeURIComponent(req.query.url || '')}&parentId=${encodeURIComponent(req.query.parentId || '')}`;
+    } else if (action === 'channel-avatar') {
+        targetUrl = `${NODE_SERVER}/api/channel-avatar?url=${encodeURIComponent(req.query.url || '')}`;
     } else if (action === 'thumb-base64') {
         targetUrl = `${NODE_SERVER}/api/thumb-base64?url=${encodeURIComponent(req.query.url || '')}`;
     } else if (action === 'nico-comments') {
