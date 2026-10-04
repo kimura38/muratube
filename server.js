@@ -23,6 +23,8 @@ app.use('/', (req, res) => {
         targetUrl = `${NODE_SERVER}/api/health`;
     } else if (action === 'recommend') {
         targetUrl = `${NODE_SERVER}/api/recommend?platform=${encodeURIComponent(req.query.platform || 'youtube')}&seed=${encodeURIComponent(req.query.seed || '')}`;
+    } else if (action === 'shorts') {
+        targetUrl = `${NODE_SERVER}/api/shorts?platform=${encodeURIComponent(req.query.platform || 'youtube')}`;
     } else if (action === 'extract') {
         const queryStr = req.query.id
             ? `id=${encodeURIComponent(req.query.id)}`
