@@ -42,8 +42,13 @@ app.use('/', (req, res) => {
         targetUrl = `${NODE_SERVER}/api/comment-replies?url=${encodeURIComponent(req.query.url || '')}&parentId=${encodeURIComponent(req.query.parentId || '')}`;
     } else if (action === 'channel-avatar') {
         targetUrl = `${NODE_SERVER}/api/channel-avatar?url=${encodeURIComponent(req.query.url || '')}`;
+    } else if (action === 'channel-banner') {
+        targetUrl = `${NODE_SERVER}/api/channel-banner?url=${encodeURIComponent(req.query.url || '')}`;
     } else if (action === 'thumb-base64') {
         targetUrl = `${NODE_SERVER}/api/thumb-base64?url=${encodeURIComponent(req.query.url || '')}`;
+    } else if (action === 'media-link') {
+        // 署名付きGooglevideo等のURL確認。実データの転送は proxy だけで行う。
+        targetUrl = `${NODE_SERVER}/api/media-link?url=${encodeURIComponent(req.query.url || '')}`;
     } else if (action === 'nico-comments') {
         targetUrl = `${NODE_SERVER}/api/nico-comments?id=${encodeURIComponent(req.query.id || '')}`;
     } else if (action === 'reviews') {
