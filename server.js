@@ -7,7 +7,7 @@ const app = express();
 
 app.use(cors());
 
-const NODE_SERVER = process.env.NODE_SERVER || 'https://mrpvp.net';
+const NODE_SERVER = process.env.NODE_SERVER || 'https://muratube.murajp.net';
 
 app.use('/', (req, res) => {
   const action = req.query.action;
